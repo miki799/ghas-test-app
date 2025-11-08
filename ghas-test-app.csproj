@@ -17,8 +17,8 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="2.0.0" />
     <!-- Vulnerable DotNetZip package -->
     <PackageReference Include="DotNetZip" Version="1.12.0" />
-    <!-- Vulnerable YamlDotNet package -->
-    <PackageReference Include="YamlDotNet" Version="11.2.0" />
+    <!-- Vulnerable SharpZipLib package -->
+    <PackageReference Include="SharpZipLib" Version="1.2.0" />
   </ItemGroup>
 
 </Project>

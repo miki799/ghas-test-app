@@ -1,10 +1,9 @@
-﻿using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
-using System;
+﻿using System;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using Serilog;
 using Ionic.Zip;
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace DotnetGhasDemo
 {
@@ -67,14 +66,22 @@ namespace DotnetGhasDemo
             }
         }
 
-        // CodeQL/code scanning: vulnerable YamlDotNet usage
-        public static object? UnsafeParseYaml(string yaml)
+        // CodeQL/code scanning: vulnerable SharpZipLib usage
+        public static void UnsafeSharpZipLibExtract(string zipPath, string extractPath)
         {
-            // BAD: YamlDotNet <11.2.1 vulnerable to unsafe deserialization
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-            return deserializer.Deserialize<object>(yaml);
+            // BAD: SharpZipLib <1.3.3 vulnerable to directory traversal
+            using (var zipInputStream = new ICSharpCode.SharpZipLib.Zip.ZipInputStream(System.IO.File.OpenRead(zipPath)))
+            {
+                ICSharpCode.SharpZipLib.Zip.ZipEntry entry;
+                while ((entry = zipInputStream.GetNextEntry()) != null)
+                {
+                    string outPath = System.IO.Path.Combine(extractPath, entry.Name);
+                    using (var outFile = System.IO.File.Create(outPath))
+                    {
+                        zipInputStream.CopyTo(outFile);
+                    }
+                }
+            }
         }
     }
 }
