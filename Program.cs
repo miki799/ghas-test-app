@@ -37,5 +37,14 @@ namespace DotnetGhasDemo
 
             Log.Information("Demo complete.");
         }
+
+        // CodeQL code smell: hardcoded credentials
+        public static bool AuthenticateUser(string username)
+        {
+            // BAD: Hardcoded password
+            string password = "SuperSecret123!";
+            // Dummy check
+            return username == "admin" && password == "SuperSecret123!";
+        }
     }
 }
