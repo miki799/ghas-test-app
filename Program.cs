@@ -1,4 +1,6 @@
-﻿using System;
+﻿using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
+using System;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using Serilog;
@@ -65,5 +67,14 @@ namespace DotnetGhasDemo
             }
         }
 
+        // CodeQL/code scanning: vulnerable YamlDotNet usage
+        public static object? UnsafeParseYaml(string yaml)
+        {
+            // BAD: YamlDotNet <11.2.1 vulnerable to unsafe deserialization
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+            return deserializer.Deserialize<object>(yaml);
+        }
     }
 }
