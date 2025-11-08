@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using Serilog;
+using Ionic.Zip;
 
 namespace DotnetGhasDemo
 {
@@ -46,5 +47,23 @@ namespace DotnetGhasDemo
             // Dummy check
             return username == "admin" && password == "SuperSecret123!";
         }
+
+        // CodeQL/code scanning: vulnerable 3rd-party dependency usage
+        public static object? UnsafeDeserialize(string json)
+        {
+            // BAD: Deserializing untrusted input with vulnerable Newtonsoft.Json
+            return Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+        }
+
+        // CodeQL/code scanning: vulnerable DotNetZip usage
+        public static void UnsafeExtractZip(string zipPath, string extractPath)
+        {
+            // BAD: DotNetZip <1.13 vulnerable to directory traversal
+            using (var zip = Ionic.Zip.ZipFile.Read(zipPath))
+            {
+                zip.ExtractAll(extractPath, Ionic.Zip.ExtractExistingFileAction.OverwriteSilently);
+            }
+        }
+
     }
 }
